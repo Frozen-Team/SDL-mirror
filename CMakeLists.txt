@@ -128,7 +128,7 @@ if(APPLE OR ARCH_64)
   set(OPT_DEF_SSEMATH ON)
 endif()
 if(UNIX OR MINGW OR MSYS)
-  set(OPT_DEF_LIBC ON)
+  set(OPT_DEF_SDL_LIBC ON)
 endif()
 
 # Compiler info
@@ -231,7 +231,7 @@ foreach(_SUB ${SDL_SUBSYSTEMS})
   option(SDL_${_OPT} "Enable the ${_SUB} subsystem" ${SDL_${_OPT}_ENABLED_BY_DEFAULT})
 endforeach()
 
-option_string(ASSERTIONS "Enable internal sanity checks (auto/disabled/release/enabled/paranoid)" "auto")
+option_string(SDL_ASSERTIONS "Enable internal sanity checks (auto/disabled/release/enabled/paranoid)" "auto")
 #set_option(DEPENDENCY_TRACKING "Use gcc -MMD -MT dependency tracking" ON)
 set_option(LIBC                "Use the system C library" ${OPT_DEF_LIBC})
 set_option(GCC_ATOMICS         "Use gcc builtin atomics" ${USE_GCC})
@@ -282,10 +282,10 @@ foreach(_SUB ${SDL_X11_OPTIONS})
   string(TOUPPER "VIDEO_X11_${_SUB}" _OPT)
   dep_option(${_OPT}           "Enable ${_SUB} support" ON "VIDEO_X11" OFF)
 endforeach()
-set_option(VIDEO_COCOA         "Use Cocoa video driver" ${APPLE})
-set_option(DIRECTX             "Use DirectX for Windows audio/video" ${WINDOWS})
-set_option(RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
-set_option(VIDEO_VIVANTE       "Use Vivante EGL video driver" ${UNIX_SYS})
+set_option(SDL_VIDEO_COCOA         "Use Cocoa video driver" ${APPLE})
+set_option(SDL_DIRECTX             "Use SDL_DirectX for Windows audio/video" ${WINDOWS})
+set_option(SDL_RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
+set_option(SDL_VIDEO_VIVANTE       "Use Vivante EGL video driver" ${UNIX_SYS})
 
 # TODO: We should (should we?) respect cmake's ${BUILD_SHARED_LIBS} flag here
 # The options below are for compatibility to configure's default behaviour.
@@ -323,7 +323,7 @@ elseif(ASSERTIONS STREQUAL "paranoid")
 else()
   message_error("unknown assertion level")
 endif()
-set(HAVE_ASSERTIONS ${ASSERTIONS})
+set(HAVE_SDL_ASSERTIONS ${SDL_ASSERTIONS})
 
 # Compiler option evaluation
 if(USE_GCC OR USE_CLANG)
@@ -335,7 +335,7 @@ if(USE_GCC OR USE_CLANG)
         int main(int argc, char **argv) { }" HAVE_DEPENDENCY_TRACKING)
   endif()
 
-  if(GCC_ATOMICS)
+  if(SDL_GCC_ATOMICS)
     check_c_source_compiles("int main(int argc, char **argv) {
         int a;
         void *x, *y, *z;
@@ -388,14 +388,14 @@ if(USE_GCC OR USE_CLANG)
   endif()
 endif()
 
-if(ASSEMBLY)
+if(SDL_ASSEMBLY)
   if(USE_GCC OR USE_CLANG)
     set(SDL_ASSEMBLY_ROUTINES 1)
     # TODO: Those all seem to be quite GCC specific - needs to be
     # reworked for better compiler support
-    set(HAVE_ASSEMBLY TRUE)
-    if(MMX)
       set(CMAKE_REQUIRED_FLAGS "-mmmx")
+    set(HAVE_SDL_ASSEMBLY TRUE)
+    if(SDL_MMX)
       check_c_source_compiles("
           #ifdef __MINGW32__
           #include <_mingw.h>
@@ -434,7 +434,7 @@ if(ASSEMBLY)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
 
-    if(SSE)
+    if(SDL_SSE)
       set(CMAKE_REQUIRED_FLAGS "-msse")
       check_c_source_compiles("
           #ifdef __MINGW32__
@@ -480,12 +480,12 @@ if(ASSEMBLY)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
 
-    if(SSEMATH)
-      if(SSE OR SSE2)
+    if(SDL_SSEMATH)
+      if(SDL_SSE OR SDL_SSE2)
         if(USE_GCC)
           list(APPEND EXTRA_CFLAGS "-mfpmath=387")
         endif()
-        set(HAVE_SSEMATH TRUE)
+        set(HAVE_SDL_SSEMATH TRUE)
       endif()
     endif()
 
@@ -516,12 +516,12 @@ if(ASSEMBLY)
     # TODO: SDL_cpuinfo.h needs to support the user's configuration wish
     # for MSVC - right now it is always activated
     if(NOT ARCH_64)
-      set(HAVE_MMX TRUE)
-      set(HAVE_3DNOW TRUE)
+      set(HAVE_SDL_MMX TRUE)
+      set(HAVE_SDL_3DNOW TRUE)
     endif()
-    set(HAVE_SSE TRUE)
-    set(HAVE_SSE2 TRUE)
-    set(SDL_ASSEMBLY_ROUTINES 1)
+    set(HAVE_SDL_SSE TRUE)
+    set(HAVE_SDL_SSE2 TRUE)
+    set(SDL_SDL_ASSEMBLY_ROUTINES 1)
   endif()
 # TODO:
 #else()
@@ -530,11 +530,11 @@ if(ASSEMBLY)
 #  endif()
 endif()
 
-# TODO: Can't deactivate on FreeBSD? w/o LIBC, SDL_stdinc.h can't define
+# TODO: Can't deactivate on FreeBSD? w/o SDL_LIBC, SDL_stdinc.h can't define
 # anything.
-if(LIBC)
+if(SDL_LIBC)
   if(WINDOWS AND NOT MINGW)
-    set(HAVE_LIBC TRUE)
+    set(HAVE_SDL_LIBC TRUE)
     foreach(_HEADER stdio.h string.h ctype.h math.h)
       string(TOUPPER "HAVE_${_HEADER}" _UPPER)
       string(REPLACE "." "_" _HAVE_H ${_UPPER})
@@ -557,7 +557,7 @@ if(LIBC)
     add_definitions(-D_USE_MATH_DEFINES) # needed for M_PI
     set(STDC_HEADERS 1)
   else()
-    set(HAVE_LIBC TRUE)
+    set(HAVE_SDL_LIBC TRUE)
     check_include_file(sys/types.h HAVE_SYS_TYPES_H)
     foreach(_HEADER
             stdio.h stdlib.h stddef.h stdarg.h malloc.h memory.h string.h
@@ -890,8 +890,8 @@ elseif(UNIX AND NOT APPLE)
     elseif(SOLARIS)
       set(SDL_RLD_FLAGS "-R\${libdir}")
     endif()
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(HAVE_RPATH TRUE)
+    set(CMAKE_BUILD_WITH_INSTALL_SDL_RPATH TRUE)
+    set(HAVE_SDL_RPATH TRUE)
   endif()
 
 elseif(WINDOWS)
@@ -905,7 +905,6 @@ elseif(WINDOWS)
   set(SOURCE_FILES ${SOURCE_FILES} ${CORE_SOURCES})
 
   # Check for DirectX
-  if(DIRECTX)
   if(SDL_DIRECTX)
     if(NOT CMAKE_COMPILER_IS_MINGW)
       if("$ENV{DXSDK_DIR}" STREQUAL "")
@@ -932,7 +931,7 @@ elseif(WINDOWS)
     check_include_file(xaudio2.h HAVE_XAUDIO2_H)
     check_include_file(dxgi.h HAVE_DXGI_H)
     if(HAVE_D3D_H OR HAVE_D3D11_H OR HAVE_DDRAW_H OR HAVE_DSOUND_H OR HAVE_DINPUT_H OR HAVE_XAUDIO2_H)
-      set(HAVE_DIRECTX TRUE)
+      set(HAVE_SDL_DIRECTX TRUE)
       if(NOT CMAKE_COMPILER_IS_MINGW)
       # TODO: change $ENV{DXSDL_DIR} to get the path from the include checks
         link_directories($ENV{DXSDK_DIR}\\lib\\${PROCESSOR_ARCH})
@@ -970,13 +969,13 @@ elseif(WINDOWS)
     file(GLOB WIN_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/windows/*.c)
     set(SOURCE_FILES ${SOURCE_FILES} ${WIN_VIDEO_SOURCES})
 
-    if(RENDER_D3D AND HAVE_D3D_H)
+    if(SDL_RENDER_D3D AND HAVE_D3D_H)
       set(SDL_VIDEO_RENDER_D3D 1)
-      set(HAVE_RENDER_D3D TRUE)
+      set(HAVE_SDL_RENDER_D3D TRUE)
     endif()
-    if(RENDER_D3D AND HAVE_D3D11_H)
+    if(SDL_RENDER_D3D AND HAVE_D3D11_H)
       set(SDL_VIDEO_RENDER_D3D11 1)
-      set(HAVE_RENDER_D3D TRUE)
+      set(HAVE_SDL_RENDER_D3D TRUE)
     endif()
     set(HAVE_SDL_VIDEO TRUE)
   endif()
