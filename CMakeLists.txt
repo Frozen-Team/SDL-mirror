@@ -427,9 +427,9 @@ if(SDL_ASSEMBLY)
           int main(int argc, char **argv) {
             void *p = 0;
             _m_prefetch(p);
-          }" HAVE_3DNOW)
-      if(HAVE_3DNOW)
         list(APPEND EXTRA_CFLAGS "-m3dnow")
+          }" HAVE_SDL_3DNOW)
+      if(HAVE_SDL_3DNOW)
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
@@ -450,9 +450,9 @@ if(SDL_ASSEMBLY)
           #ifndef __SSE__
           #error Assembler CPP flag not enabled
           #endif
-          int main(int argc, char **argv) { }" HAVE_SSE)
-      if(HAVE_SSE)
         list(APPEND EXTRA_CFLAGS "-msse")
+          int main(int argc, char **argv) { }" HAVE_SDL_SSE)
+      if(HAVE_SDL_SSE)
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
@@ -473,9 +473,9 @@ if(SDL_ASSEMBLY)
           #ifndef __SSE2__
           #error Assembler CPP flag not enabled
           #endif
-          int main(int argc, char **argv) { }" HAVE_SSE2)
-      if(HAVE_SSE2)
         list(APPEND EXTRA_CFLAGS "-msse2")
+          int main(int argc, char **argv) { }" HAVE_SDL_SSE2)
+      if(HAVE_SDL_SSE2)
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
@@ -496,12 +496,12 @@ if(SDL_ASSEMBLY)
           vector unsigned int vzero() {
               return vec_splat_u32(0);
           }
-          int main(int argc, char **argv) { }" HAVE_ALTIVEC_H_HDR)
+          int main(int argc, char **argv) { }" HAVE_SDL_ALTIVEC_H_HDR)
       check_c_source_compiles("
           vector unsigned int vzero() {
               return vec_splat_u32(0);
           }
-          int main(int argc, char **argv) { }" HAVE_ALTIVEC)
+          int main(int argc, char **argv) { }" HAVE_SDL_ALTIVEC)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
       if(HAVE_ALTIVEC OR HAVE_ALTIVEC_H_HDR)
         set(HAVE_ALTIVEC TRUE) # if only HAVE_ALTIVEC_H_HDR is set
@@ -657,17 +657,17 @@ endif()
 # General SDL subsystem options, valid for all platforms
 if(SDL_AUDIO)
   # CheckDummyAudio/CheckDiskAudio - valid for all platforms
-  if(DUMMYAUDIO)
+  if(SDL_DUMMYAUDIO)
     set(SDL_AUDIO_DRIVER_DUMMY 1)
-    file(GLOB DUMMYAUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/dummy/*.c)
-    set(SOURCE_FILES ${SOURCE_FILES} ${DUMMYAUDIO_SOURCES})
-    set(HAVE_DUMMYAUDIO TRUE)
+    file(GLOB SDL_DUMMYAUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/dummy/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${SDL_DUMMYAUDIO_SOURCES})
+    set(HAVE_SDL_DUMMYAUDIO TRUE)
   endif()
   if(SDL_DISKAUDIO)
     set(SDL_AUDIO_DRIVER_DISK 1)
-    file(GLOB DISKAUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/disk/*.c)
-    set(SOURCE_FILES ${SOURCE_FILES} ${DISKAUDIO_SOURCES})
-    set(HAVE_DISKAUDIO TRUE)
+    file(GLOB SDL_DISKAUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/disk/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${SDL_DISKAUDIO_SOURCES})
+    set(HAVE_SDL_DISKAUDIO TRUE)
   endif()
 endif()
 
@@ -681,9 +681,8 @@ endif()
 if(SDL_VIDEO)
   if(SDL_VIDEO_DUMMY)
     set(SDL_VIDEO_DRIVER_DUMMY 1)
-    file(GLOB VIDEO_DUMMY_SOURCES ${SDL2_SOURCE_DIR}/src/video/dummy/*.c)
-    set(SOURCE_FILES ${SOURCE_FILES} ${VIDEO_DUMMY_SOURCES})
-    set(HAVE_VIDEO_DUMMY TRUE)
+    file(GLOB SDL_VIDEO_DUMMY_SOURCES ${SDL2_SOURCE_DIR}/src/video/dummy/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${SDL_VIDEO_DUMMY_SOURCES})
     set(HAVE_SDL_VIDEO_DUMMY TRUE)
     set(HAVE_SDL_VIDEO TRUE)
   endif()
@@ -818,9 +817,7 @@ elseif(UNIX AND NOT APPLE)
   if(SDL_INPUT_TSLIB)
     check_c_source_compiles("
         #include \"tslib.h\"
-        int main(int argc, char** argv) { }" HAVE_INPUT_TSLIB)
-    if(HAVE_INPUT_TSLIB)
-      set(SDL_INPUT_TSLIB 1)
+        int main(int argc, char** argv) { }" HAVE_SDL_INPUT_TSLIB)
     if(HAVE_SDL_INPUT_TSLIB)
       set(SDL_SDL_INPUT_TSLIB 1)
       list(APPEND EXTRA_LIBS ts)
@@ -839,16 +836,13 @@ elseif(UNIX AND NOT APPLE)
 
   CheckPTHREAD()
 
-  if(CLOCK_GETTIME)
-    check_library_exists(rt clock_gettime "" FOUND_CLOCK_GETTIME)
-    if(FOUND_CLOCK_GETTIME)
   if(SDL_CLOCK_GETTIME)
+    check_library_exists(rt clock_gettime "" FOUND_SDL_CLOCK_GETTIME)
+    if(FOUND_SDL_CLOCK_GETTIME)
       list(APPEND EXTRA_LIBS rt)
       set(HAVE_SDL_CLOCK_GETTIME 1)
     else()
-      check_library_exists(c clock_gettime "" FOUND_CLOCK_GETTIME)
-      if(FOUND_CLOCK_GETTIME)
-        set(HAVE_CLOCK_GETTIME 1)
+      check_library_exists(c clock_gettime "" FOUND_SDL_CLOCK_GETTIME)
       if(FOUND_SDL_CLOCK_GETTIME)
         set(HAVE_SDL_CLOCK_GETTIME 1)
       endif()
