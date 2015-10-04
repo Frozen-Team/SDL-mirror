@@ -310,8 +310,8 @@ file(GLOB SOURCE_FILES
   ${SDL2_SOURCE_DIR}/src/video/*.c)
 
 
-  # Do nada - use optimization settings to determine the assertion level
 if(SDL_ASSERTIONS STREQUAL "auto")
+  # Do nada - use optimization settings to determine the assertion level
 elseif(SDL_ASSERTIONS STREQUAL "disabled")
   set(SDL_DEFAULT_ASSERT_LEVEL 0)
 elseif(SDL_ASSERTIONS STREQUAL "release")
@@ -427,9 +427,9 @@ if(SDL_ASSEMBLY)
           int main(int argc, char **argv) {
             void *p = 0;
             _m_prefetch(p);
-        list(APPEND EXTRA_CFLAGS "-m3dnow")
           }" HAVE_SDL_3DNOW)
       if(HAVE_SDL_3DNOW)
+        list(APPEND EXTRA_CFLAGS "-m3dnow")
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
@@ -450,9 +450,9 @@ if(SDL_ASSEMBLY)
           #ifndef __SSE__
           #error Assembler CPP flag not enabled
           #endif
-        list(APPEND EXTRA_CFLAGS "-msse")
           int main(int argc, char **argv) { }" HAVE_SDL_SSE)
       if(HAVE_SDL_SSE)
+        list(APPEND EXTRA_CFLAGS "-msse")
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
@@ -473,9 +473,9 @@ if(SDL_ASSEMBLY)
           #ifndef __SSE2__
           #error Assembler CPP flag not enabled
           #endif
-        list(APPEND EXTRA_CFLAGS "-msse2")
           int main(int argc, char **argv) { }" HAVE_SDL_SSE2)
       if(HAVE_SDL_SSE2)
+        list(APPEND EXTRA_CFLAGS "-msse2")
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
