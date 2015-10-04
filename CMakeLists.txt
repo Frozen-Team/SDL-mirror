@@ -125,7 +125,7 @@ endif()
 
 # Default option knobs
 if(APPLE OR ARCH_64)
-  set(OPT_DEF_SSEMATH ON)
+  set(OPT_DEF_SDL_SSEMATH ON)
 endif()
 if(UNIX OR MINGW OR MSYS)
   set(OPT_DEF_SDL_LIBC ON)
@@ -310,15 +310,15 @@ file(GLOB SOURCE_FILES
   ${SDL2_SOURCE_DIR}/src/video/*.c)
 
 
-if(ASSERTIONS STREQUAL "auto")
   # Do nada - use optimization settings to determine the assertion level
-elseif(ASSERTIONS STREQUAL "disabled")
+if(SDL_ASSERTIONS STREQUAL "auto")
+elseif(SDL_ASSERTIONS STREQUAL "disabled")
   set(SDL_DEFAULT_ASSERT_LEVEL 0)
-elseif(ASSERTIONS STREQUAL "release")
+elseif(SDL_ASSERTIONS STREQUAL "release")
   set(SDL_DEFAULT_ASSERT_LEVEL 1)
-elseif(ASSERTIONS STREQUAL "enabled")
+elseif(SDL_ASSERTIONS STREQUAL "enabled")
   set(SDL_DEFAULT_ASSERT_LEVEL 2)
-elseif(ASSERTIONS STREQUAL "paranoid")
+elseif(SDL_ASSERTIONS STREQUAL "paranoid")
   set(SDL_DEFAULT_ASSERT_LEVEL 3)
 else()
   message_error("unknown assertion level")
@@ -343,8 +343,8 @@ if(USE_GCC OR USE_CLANG)
         __sync_lock_test_and_set(&x, y);
         __sync_fetch_and_add(&a, 1);
         __sync_bool_compare_and_swap(&a, 5, 10);
-        __sync_bool_compare_and_swap(&x, y, z); }" HAVE_GCC_ATOMICS)
-    if(NOT HAVE_GCC_ATOMICS)
+        __sync_bool_compare_and_swap(&x, y, z); }" HAVE_SDL_GCC_ATOMICS)
+    if(NOT HAVE_SDL_GCC_ATOMICS)
       check_c_source_compiles("int main(int argc, char **argv) {
           int a;
           __sync_lock_test_and_set(&a, 1);
@@ -417,7 +417,7 @@ if(SDL_ASSEMBLY)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
 
-    if(3DNOW)
+    if(SDL_3DNOW)
       set(CMAKE_REQUIRED_FLAGS "-m3dnow")
       check_c_source_compiles("
           #include <mm3dnow.h>
@@ -457,7 +457,7 @@ if(SDL_ASSEMBLY)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
     endif()
 
-    if(SSE2)
+    if(SDL_SSE2)
       set(CMAKE_REQUIRED_FLAGS "-msse2")
       check_c_source_compiles("
           #ifdef __MINGW32__
@@ -489,7 +489,7 @@ if(SDL_ASSEMBLY)
       endif()
     endif()
 
-    if(ALTIVEC)
+    if(SDL_ALTIVEC)
       set(CMAKE_REQUIRED_FLAGS "-maltivec")
       check_c_source_compiles("
           #include <altivec.h>
