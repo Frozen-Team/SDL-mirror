@@ -390,12 +390,12 @@ endif()
 
 if(SDL_ASSEMBLY)
   if(USE_GCC OR USE_CLANG)
-    set(SDL_ASSEMBLY_ROUTINES 1)
+    set(SDL_SDL_ASSEMBLY_ROUTINES 1)
     # TODO: Those all seem to be quite GCC specific - needs to be
     # reworked for better compiler support
-      set(CMAKE_REQUIRED_FLAGS "-mmmx")
     set(HAVE_SDL_ASSEMBLY TRUE)
     if(SDL_MMX)
+      set(CMAKE_REQUIRED_FLAGS "-mmmx")
       check_c_source_compiles("
           #ifdef __MINGW32__
           #include <_mingw.h>
@@ -410,8 +410,8 @@ if(SDL_ASSEMBLY)
           #ifndef __MMX__
           #error Assembler CPP flag not enabled
           #endif
-          int main(int argc, char **argv) { }" HAVE_MMX)
-      if(HAVE_MMX)
+          int main(int argc, char **argv) { }" HAVE_SDL_MMX)
+      if(HAVE_SDL_MMX)
         list(APPEND EXTRA_CFLAGS "-mmmx")
       endif()
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
@@ -503,12 +503,12 @@ if(SDL_ASSEMBLY)
           }
           int main(int argc, char **argv) { }" HAVE_SDL_ALTIVEC)
       set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
-      if(HAVE_ALTIVEC OR HAVE_ALTIVEC_H_HDR)
-        set(HAVE_ALTIVEC TRUE) # if only HAVE_ALTIVEC_H_HDR is set
+      if(HAVE_SDL_ALTIVEC OR HAVE_SDL_ALTIVEC_H_HDR)
+        set(HAVE_SDL_ALTIVEC TRUE) # if only HAVE_SDL_ALTIVEC_H_HDR is set
         list(APPEND EXTRA_CFLAGS "-maltivec")
         set(SDL_ALTIVEC_BLITTERS 1)
-        if(HAVE_ALTIVEC_H_HDR)
-          set(HAVE_ALTIVEC_H 1)
+        if(HAVE_SDL_ALTIVEC_H_HDR)
+          set(HAVE_SDL_ALTIVEC_H 1)
         endif()
       endif()
     endif()
