@@ -159,8 +159,8 @@ if(NOT ("$ENV{CFLAGS}" STREQUAL "")) # Hackish, but does the trick on Win32
 endif()
 
 if(MSVC)
-  option(FORCE_STATIC_VCRT "Force /MT for static VC runtimes" OFF)
-  if(FORCE_STATIC_VCRT)
+  option(SDL_FORCE_STATIC_VCRT "Force /MT for static VC runtimes" OFF)
+  if(SDL_FORCE_STATIC_VCRT)
     foreach(flag_var
         CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
         CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
@@ -889,7 +889,7 @@ elseif(UNIX AND NOT APPLE)
   endif()
 
 elseif(WINDOWS)
-  find_program(WINDRES windres)
+  find_program(SDL_WINDRES windres)
 
   check_c_source_compiles("
     #include <windows.h>
@@ -1388,6 +1388,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 # Always build SDLmain
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
+set_target_properties(SDL2main PROPERTIES DEBUG_POSTFIX -d)
 set(_INSTALL_LIBS "SDL2main")
 
 if(SDL_SHARED)
@@ -1410,7 +1411,11 @@ endif()
 if(SDL_STATIC)
   set (BUILD_SHARED_LIBS FALSE)
   add_library(SDL2-static STATIC ${SOURCE_FILES})
-  set_target_properties(SDL2-static PROPERTIES OUTPUT_NAME "SDL2")
+  set_target_properties(SDL2-static 
+    PROPERTIES 
+      OUTPUT_NAME "SDL2"
+      DEBUG_POSTFIX -d
+  )
   if(MSVC)
     set_target_properties(SDL2-static PROPERTIES LINK_FLAGS_RELEASE "/NODEFAULTLIB")
     set_target_properties(SDL2-static PROPERTIES LINK_FLAGS_DEBUG "/NODEFAULTLIB")
