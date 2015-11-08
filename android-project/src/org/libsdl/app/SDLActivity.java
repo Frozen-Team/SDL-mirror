@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 
 import android.app.*;
 import android.content.*;
+import android.text.InputType;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
@@ -300,7 +301,7 @@ public class SDLActivity extends Activity {
         if (!SDLActivity.mIsPaused && SDLActivity.mIsSurfaceReady) {
             SDLActivity.mIsPaused = true;
             SDLActivity.nativePause();
-            mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, false);
+            mSurface.handlePause();
         }
     }
 
@@ -999,6 +1000,10 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         mHeight = 1.0f;
     }
 
+    public void handlePause() {
+        enableSensor(Sensor.TYPE_ACCELEROMETER, false);
+    }
+
     public void handleResume() {
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -1389,6 +1394,7 @@ class DummyEdit extends View implements View.OnKeyListener {
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         ic = new SDLInputConnection(this, true);
 
+        outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | 33554432 /* API 11: EditorInfo.IME_FLAG_NO_FULLSCREEN */;
 
